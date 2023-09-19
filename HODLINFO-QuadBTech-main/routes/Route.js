@@ -6,22 +6,6 @@ const moment = require('moment')
 const cron = require('node-cron');
 require('moment-timezone')
 
-// const baseUnits = ['btc', 'eth', 'btt', 'usdt', 'trx', 'xrp', 'dash', 'zec', 'xem', 'iost', 'win', 'wrx'];
-
-// baseUnits.forEach((baseUnit) => {
-//     cron.schedule('* * * * *', async () => {
-//       try {
-//         console.log("Minute")
-//         console.log(`Fetching and storing data for ${baseUnit} from the API...`);
-//         const processedData = await fetchDataByBaseUnit(baseUnit);
-//         console.log(`Data for ${baseUnit} fetched and stored successfully.`);
-//         console.log("Minute")
-//       } catch (error) {
-//         console.error(`Error fetching and storing data for ${baseUnit}:`, error);
-//       }
-//     });
-//   });
-
 router.get('/',(req,res)=>{
     const baseUnit = "btc"
     fetchDataByBaseUnit(baseUnit)
