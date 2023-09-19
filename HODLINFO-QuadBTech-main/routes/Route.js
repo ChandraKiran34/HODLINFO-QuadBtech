@@ -3,7 +3,6 @@ const router = express.Router()
 const axios = require("axios")
 const CryptoData = require('../models/cryptoDataSchema')
 const moment = require('moment')
-const cron = require('node-cron');
 require('moment-timezone')
 
 router.get('/',(req,res)=>{
@@ -154,7 +153,7 @@ router.get('/win',(req,res)=>
 
 router.get('/wrx',(req,res)=>
 {
-    const baseUnit = "wrx"; // Change this to the desired base_unit
+    const baseUnit = "wrx"; 
     fetchDataByBaseUnit(baseUnit)
     .then((processedData) => {
         res.render('index', { data: processedData,unit: baseUnit });
@@ -163,37 +162,26 @@ router.get('/wrx',(req,res)=>
         console.error(error);
         res.status(500).send('Internal error fetching and storing data');
     });
-
 })
 
 
 
 router.get('/telegram' , (req , res)=>{
     res.render("../views/telegram.ejs")
-    // router code here
 })
 
 const fetchDataByBaseUnit = async (baseUnit) => {
     try {
-        // fetching the data
         const response = await axios.get('https://api.wazirx.com/api/v2/tickers')
         const res_data = await response.data
-
-        // slice the top 10 results
         const result = Object.values(res_data).slice(0,10)
-
-        // creating an array of Data Model instance
         const cryptoDataArray = result.map((data) => new CryptoData(data))
-
-        // store the data in DB collection
-        // await CryptoData.insertMany(cryptoDataArray)
-
-        // process the data
-
         var storedData = await CryptoData.find({ "base_unit": baseUnit }).sort({ _id: -1 }).limit(10)
 
         storedData.reverse()
 
+         await CryptoData.insertMany(cryptoDataArray)
+         
         const processedData = []
         if(storedData.length == 0)
         {
@@ -209,7 +197,6 @@ const fetchDataByBaseUnit = async (baseUnit) => {
                 last: 0,
                 tradeTime: '',
             }
-
             processedData.push(processedDoc)
         } else{
             storedData.forEach((data) => {
@@ -219,7 +206,6 @@ const fetchDataByBaseUnit = async (baseUnit) => {
                 const tradeTime = timestamp.tz('Asia/Kolkata').format('DD/MM/YYYY [at] h:mm A')
     
                 base_unit = base_unit.toUpperCase()
-                // Create an object containing the processed data for each base unit
                 const processedDoc = {
                     baseUnit: base_unit,
                     name: name,
@@ -232,7 +218,6 @@ const fetchDataByBaseUnit = async (baseUnit) => {
                     last: last,
                     tradeTime: tradeTime,
                 }
-    
                 processedData.push(processedDoc)
             })
         }
@@ -245,9 +230,5 @@ const fetchDataByBaseUnit = async (baseUnit) => {
         throw new Error('Internal error fetching and storing data');
     }
 }
-
-// Example usage:
-
-
 
 module.exports = router
